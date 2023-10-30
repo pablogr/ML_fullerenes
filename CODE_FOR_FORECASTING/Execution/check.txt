@@ -1,0 +1,30 @@
+C46-C1-103,C,C1,18.9,-11.3,-30.2
+ * The HOMO forecasted through ML (RF) on top of linear regression is 20.759994477315676 +/- 0.2462899323041669
+ * The LUMO forecasted through ML (RF) on top of linear regression is -11.4 +/- 0.322
+ * The gap forecasted through ML (RF) on top of linear regression is -31.1 +/- 0.431
+ 
+ C50-C1-236,C,C1,-0.72,-23.66,-22.94
+ * The HOMO renormalization forecasted through linear regression is -1.42222
+   * The HOMO renormalization forecasted through machine learning (Random Forests) on top of linear regression is -1.93 +/- 0.181
+      * The LUMO renormalization forecasted through linear regression is -24.0347
+   * The LUMO renormalization forecasted through machine learning (Random Forests) on top of linear regression is -25.4 +/- 0.281
+      * The gap renormalization forecasted through linear regression is -20.1971
+   * The gap renormalization forecasted through machine learning (Random Forests) on top of linear regression is -22.3 +/- 0.346
+   
+   
+C64-D2-5,D,D2,21.5,-53.1,-74.6 
+   * The HOMO renormalization forecasted through linear regression is 25.6125
+   * The HOMO renormalization forecasted through machine learning (Random Forests) on top of linear regression is 23.5 +/- 0.261
+   * The LUMO renormalization forecasted through linear regression is -52.1619
+   * The LUMO renormalization forecasted through machine learning (Random Forests) on top of linear regression is -52.9 +/- 0.291
+      * The gap renormalization forecasted through linear regression is -75.1586
+   * The gap renormalization forecasted through machine learning (Random Forests) on top of linear regression is -74.1 +/- 0.451
+
+
+C104-C1-418995-NZ,C,C1,5.5,-20.8,-26.3 
+   * The HOMO renormalization forecasted through linear regression is 10.9789
+   * The HOMO renormalization forecasted through machine learning (Random Forests) on top of linear regression is 6.4 +/- 0.221
+   * The LUMO renormalization forecasted through linear regression is -13.0788
+   * The LUMO renormalization forecasted through machine learning (Random Forests) on top of linear regression is -17.9 +/- 0.354
+   * The gap renormalization forecasted through linear regression is -26.8082
+   * The gap renormalization forecasted through machine learning (Random Forests) on top of linear regression is -25.7 +/- 0.285
