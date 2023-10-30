@@ -27,7 +27,7 @@ else: # alternative regressors
 if (not alternative_regressors):
 
     ### LIST OF EVA'S ALTERNATIVE REGRESSORS (SECTION OF II.B.3 OF THE ARTICLE) ############################################
-
+    ''' 
     list_regressors_lin_ols_HOMO = ["avgoccupied(eV-1)", "HOMO-(HOMO-1)", "HOMO-(HOMO-2)", "inv(HOMO-(HOMO-1))","inv(HOMO-(HOMO-2))"]
 
     list_regressors_lin_ols_LUMO_1 = ["Gap_PBE", "avgempty(eV-1)", "HOMO-(HOMO-1)", "HOMO-(HOMO-2)"]
@@ -37,6 +37,7 @@ if (not alternative_regressors):
     list_regressors_lin_ols_gap_1 = ["Gap_PBE", "avgoccupied(eV-1)", "inv((LUMO+1)-LUMO)"]
     list_regressors_lin_ols_gap_2 = ["Gap_B3LYP", "avgoccupied(eV-1)", "inv((LUMO+1)-LUMO)"]
     list_regressors_lin_ols_gapr = [list_regressors_lin_ols_gap_1, list_regressors_lin_ols_gap_2]
+    ''' 
 
     # end of LIST OF EVA'S ALTERNATIVE REGRESSORS ############################################################################
 
@@ -48,7 +49,7 @@ if (not alternative_regressors):
     list_regressors_lin_ols_LUMO = ["Gap_PBE", "avgempty(eV-1)", "HOMO-(HOMO-1)", "inv((LUMO+2)-LUMO)", "inv((LUMO+1)-LUMO)"]
     list_regressors_lin_ols_gapr = ["Gap_PBE", "avgoccupied(eV-1)", "avgempty(eV-1)", "inv(HOMO-(HOMO-1))", "inv((LUMO+1)-LUMO)"]
     
-    ''' 
+    
     list_regressors_RF_HOMOr = list_regressors_lin_ols_HOMO.copy() #["Gap_PBE","Gap_B3LYP","avgoccupied(eV-1)" ,  "inv(HOMO-(HOMO-1))", "inv(HOMO-(HOMO-2))", "inv(HOMO-(HOMO-3))","inv(HOMO-(HOMO-4))" , "HOMO-(HOMO-1)" ,  ]
     list_regressors_RF_LUMOr = ["Gap_PBE","Gap_B3LYP","avgempty(eV-1)" ,"inv((LUMO+4)-LUMO)",  "inv((LUMO+3)-LUMO)", "inv((LUMO+2)-LUMO)","inv((LUMO+1)-LUMO)"  ,   ]
     list_regressors_RF_gapr  = ["Gap_PBE","Gap_B3LYP","avgempty(eV-1)" ,"avgoccupied(eV-1)" ,  "inv(HOMO-(HOMO-1))", "inv(HOMO-(HOMO-2))", "inv(HOMO-(HOMO-3))","inv(HOMO-(HOMO-4))", "inv((LUMO+4)-LUMO)",  "inv((LUMO+3)-LUMO)", "inv((LUMO+2)-LUMO)","inv((LUMO+1)-LUMO)"  ,   ]
@@ -60,8 +61,7 @@ if (not alternative_regressors):
     list_regressors_KNN_HOMOr = [ "avgoccupied(eV-1)", "avgempty(eV-1)" ]
     list_regressors_KNN_LUMOr = [ "avgoccupied(eV-1)", "avgempty(eV-1)" ]
     list_regressors_KNN_gapr  = [ "avgoccupied(eV-1)", "avgempty(eV-1)" ]
-    '''
-
+    
 else: # alternative_regressors
 
     # list_regr_alt = ["Gap_PBE", "avgoccupied(eV-1)", "avgempty(eV-1)","(LUMO+1)-LUMO", "(LUMO+2)-LUMO", "(LUMO+3)-LUMO", "(LUMO+4)-LUMO","(LUMO+5)-LUMO","inv((LUMO+1)-LUMO)","inv((LUMO+2)-LUMO)", "inv((LUMO+3)-LUMO)", "inv((LUMO+4)-LUMO)", "inv((LUMO+5)-LUMO)","inv(LUMO-(HOMO-1))", "inv(LUMO-(HOMO-2))", "inv((LUMO+1)-HOMO)","inv((LUMO+2)-HOMO)"]
