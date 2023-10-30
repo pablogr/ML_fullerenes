@@ -6,7 +6,7 @@ from pandas import DataFrame
 from os import getcwd, makedirs, path
 
 ratio_data_test = 0.2          # This is the ratio of the raw data which is used for test and for backtesting. For the training, the ratio of data used is 1 - 2·ratio_data_test_and_BT.
-N_essais = 1000                # xxx  (e.g. 1000) This is the number of times that one runs the ML algorithm, this is the number of times that one randomly selects the training, test and BT datasets and runs ML on them, collects results, etc.
+N_essais = 1000                # (e.g. 1000) This is the number of times that one runs the ML algorithm, this is the number of times that one randomly selects the training, test and BT datasets and runs ML on them, collects results, etc.
 verbosity = 0                  # 0, 1 or 2, for different length of the outputs to screen.
 BT_data = False                # True if the whole dataset must be split into 3 parts (training, test, backtesting) and False if BT is not necessary.
 standardize_regressors = False # If True then the regressors are standardized at the beginning of the algorithm (before splitting the whole dataset into training and test datasets).
