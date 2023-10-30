@@ -1,7 +1,7 @@
 # ML_fullerenes_renormalization_code_for_forecasting
 
 ===============================================
-                 PROGRAM USED TO FORECAST THE RENORMALIZATION OF ELECTRONIC EIGENVALUES OF FULLERENES
+                 PROGRAM TO FORECAST THE RENORMALIZATION OF ELECTRONIC EIGENVALUES OF FULLERENES
       See 'ELECTRON-VIBRATIONAL RENORMALIZATION IN FULLERENES THROUGH AB INITION AND MACHINE LEARNING METHODS'
                                        BY PABLO GARCIA-RISUENO ET AL.
 ===============================================
