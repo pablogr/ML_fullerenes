@@ -1,10 +1,10 @@
 # ML_fullerenes_renormalization_code_for_forecasting
 
-======================================================
+===============================================
                  PROGRAM USED TO FORECAST THE RENORMALIZATION OF ELECTRONIC EIGENVALUES OF FULLERENES
       See 'ELECTRON-VIBRATIONAL RENORMALIZATION IN FULLERENES THROUGH AB INITION AND MACHINE LEARNING METHODS'
                                        BY PABLO GARCIA-RISUENO ET AL.
-======================================================
+===============================================
 
 This program forecasts the renormalizations of electronic eigenvalues of fullerenes using ab initio data calculated with
 Quantum Espresso. If you want to have an estimate of the renormalization of electronic eigenvalues in a fullerene,
