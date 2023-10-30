@@ -1,0 +1,11 @@
+
+
+# Number_of_atoms = 
+Number_of_species = 1
+
+elec_eigval_file_name = out_scf.out
+Band_occupation = 2
+
+phonon_frequency_file_name = Uvec.dat 
+phonon_frequency_units=cm-1
+
