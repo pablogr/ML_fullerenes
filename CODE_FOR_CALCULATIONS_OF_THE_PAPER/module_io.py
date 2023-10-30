@@ -40,15 +40,15 @@ if (not alternative_regressors):
 
     # end of LIST OF EVA'S ALTERNATIVE REGRESSORS ############################################################################
 
-    ''' xxx: Uncomment if you do not want to use Eva's regressors
+
     list_regressors_lin_ols_HOMO = ["Gap_PBE", "avgoccupied(eV-1)",
                      "HOMO-(HOMO-1)", "HOMO-(HOMO-2)", "HOMO-(HOMO-3)", "HOMO-(HOMO-4)", "HOMO-(HOMO-5)",
                      "inv(HOMO-(HOMO-1))", "inv(HOMO-(HOMO-2))", "inv(HOMO-(HOMO-3))","inv(HOMO-(HOMO-4))", "inv(HOMO-(HOMO-5))",
                      "inv(LUMO-(HOMO-1))", "inv(LUMO-(HOMO-2))", "inv((LUMO+1)-HOMO)","inv((LUMO+2)-HOMO)"]
     list_regressors_lin_ols_LUMO = ["Gap_PBE", "avgempty(eV-1)", "HOMO-(HOMO-1)", "inv((LUMO+2)-LUMO)", "inv((LUMO+1)-LUMO)"]
     list_regressors_lin_ols_gapr = ["Gap_PBE", "avgoccupied(eV-1)", "avgempty(eV-1)", "inv(HOMO-(HOMO-1))", "inv((LUMO+1)-LUMO)"]
-    '''
-
+    
+    ''' 
     list_regressors_RF_HOMOr = list_regressors_lin_ols_HOMO.copy() #["Gap_PBE","Gap_B3LYP","avgoccupied(eV-1)" ,  "inv(HOMO-(HOMO-1))", "inv(HOMO-(HOMO-2))", "inv(HOMO-(HOMO-3))","inv(HOMO-(HOMO-4))" , "HOMO-(HOMO-1)" ,  ]
     list_regressors_RF_LUMOr = ["Gap_PBE","Gap_B3LYP","avgempty(eV-1)" ,"inv((LUMO+4)-LUMO)",  "inv((LUMO+3)-LUMO)", "inv((LUMO+2)-LUMO)","inv((LUMO+1)-LUMO)"  ,   ]
     list_regressors_RF_gapr  = ["Gap_PBE","Gap_B3LYP","avgempty(eV-1)" ,"avgoccupied(eV-1)" ,  "inv(HOMO-(HOMO-1))", "inv(HOMO-(HOMO-2))", "inv(HOMO-(HOMO-3))","inv(HOMO-(HOMO-4))", "inv((LUMO+4)-LUMO)",  "inv((LUMO+3)-LUMO)", "inv((LUMO+2)-LUMO)","inv((LUMO+1)-LUMO)"  ,   ]
@@ -60,6 +60,7 @@ if (not alternative_regressors):
     list_regressors_KNN_HOMOr = [ "avgoccupied(eV-1)", "avgempty(eV-1)" ]
     list_regressors_KNN_LUMOr = [ "avgoccupied(eV-1)", "avgempty(eV-1)" ]
     list_regressors_KNN_gapr  = [ "avgoccupied(eV-1)", "avgempty(eV-1)" ]
+    '''
 
 else: # alternative_regressors
 
