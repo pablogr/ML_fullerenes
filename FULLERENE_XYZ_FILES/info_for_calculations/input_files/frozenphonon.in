@@ -1,0 +1,37 @@
+# THIS IS THE INPUT FILE FOR THE PROGRAM THAT
+# GENERATES THE INPUT OF Maat (genmaatinput.x)
+
+!Initial_Temperature = 0.000000001d0 K
+!Final_Temperature = 500.0 K
+!Number_of_temperatures = 501
+
+Temperature = 0.0000001 K
+
+HOMO_imposed_degeneracy = 5
+LUMO_imposed_degeneracy = 3
+
+Number_of_atoms = 60
+Number_of_species = 1
+
+Eigenvalues_from_xml_files = 1
+
+elec_eigval_file_name = out_scf.out
+xml_eigval_file_name = eigenval.xml 
+
+Band_occupation = 2
+
+Finite_Difference_Parameter=6.000000 
+
+phonon_frequency_file_name = Uvec.dat 
+phonon_frequency_units=cm-1
+
+Check_crossover = 0
+Crossovers_from_file = 0
+InitialStateFPh = 110
+FinalStateFPh = 130
+
+InitialMode = 7
+FinalMode = 180
+
+folder_output_files_displaced+ = outputfiles/outputsVeffcalc/displaced+
+folder_output_files_displaced- = outputfiles/outputsVeffcalc/displaced-

@@ -1,0 +1,9 @@
+Phonons at Gamma
+ &inputph
+  tr2_ph=3.0d-22,
+  amass(1)=12.0107,
+  outdir='./'
+  fildyn='dynG',
+  epsil=.true.
+ /
+ 0.0 0.0 0.0

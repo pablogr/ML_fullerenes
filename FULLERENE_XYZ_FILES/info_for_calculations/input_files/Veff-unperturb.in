@@ -1,0 +1,12 @@
+&inputPP
+    prefix='C60-',
+   outdir='./',
+   plot_num=1,
+   spin_component=0,
+   filplot = 'Veff_unperturb.pot'
+/
+&plot
+   iflag=3,
+   output_format=5
+/
+
