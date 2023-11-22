@@ -8,6 +8,7 @@ The repository consists of three parts:
 
 CODE_FOR_CALCULATIONS_OF_THE_PAPER
 This includes the code which was used to perform the regression-based calculations whose results are presented in the article 'Electron-vibrational renormalization in fullerenes through ab initio and machine learning methods', by Pablo Garcıa-Risueno, Eva Armengol, Angel Garcia-Cerdana, David Carrasco-Busturia and Juan M. Garcia-Lastra. 
+The input and output files of the ab initio (DFT) calculation can be found in https://doi.org/10.5281/zenodo.10059442
 
 CODE_FOR_FORECASTING
 This includes the code which can be used to make a forecast of the renormalization of the electronic eigenvalues of an arbitrary fullerene. One just need to enter a file with the results of a given DFT ground state calculation and the code outputs an estimate of the electron-vibrational renormalization.
