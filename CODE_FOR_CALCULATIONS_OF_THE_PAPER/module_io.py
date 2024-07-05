@@ -6,14 +6,15 @@ from pandas import DataFrame
 from os import getcwd, makedirs, path
 
 ratio_data_test = 0.2          # This is the ratio of the raw data which is used for test and for backtesting. For the training, the ratio of data used is 1 - 2·ratio_data_test_and_BT.
-N_essais = 1000                # (e.g. 1000) This is the number of times that one runs the ML algorithm, this is the number of times that one randomly selects the training, test and BT datasets and runs ML on them, collects results, etc.
+N_essais = 100              # xxx  (e.g. 1000) This is the number of times that one runs the ML algorithm, this is the number of times that one randomly selects the training, test and BT datasets and runs ML on them, collects results, etc.
 verbosity = 0                  # 0, 1 or 2, for different length of the outputs to screen.
 BT_data = False                # True if the whole dataset must be split into 3 parts (training, test, backtesting) and False if BT is not necessary.
 standardize_regressors = False # If True then the regressors are standardized at the beginning of the algorithm (before splitting the whole dataset into training and test datasets).
 store_ml_errors        = True  # If true then the in-sample and out-of-sample errors are stored to files.
 store_regressors       = True  # If true and store_ml_errors also true, then the regressors are stored together with the outputs in Executions/Results.
 alternative_regressors = False  # Set to True to try non-optimized lists of regressors (see below).
-use_ensemble_for_ols   = True   # If True, then the linear regression (LR) is calculated using two different lists of regressors; the forecast is the average of both outputs. Set to True if you want to use Eva's regressors and the quantity is either LUMO_ren or Gap_ren
+use_ensemble_for_ols   = False   # If True, then the linear regression (LR) is calculated using two different lists of regressors; the forecast is the average of both outputs. Set to True if you want to use Eva's regressors and the quantity is either LUMO_ren or Gap_ren
+plot_FI_MDI_separating_train = False # If true, plots of Feature Importance using the Mean Decreasing in Impurity are done using results from taking subsets of the whole set of data.
 
 code_dir = getcwd()
 execution_directory = code_dir+"/Execution/"
@@ -24,10 +25,14 @@ if (not alternative_regressors):
 else: # alternative regressors
     filepath_raw_input_data = f"Data_ab_initio/fullerenes_data_2023_wo3outliers_more_enhanced.csv"
 
+
 if (not alternative_regressors):
 
-    ### LIST OF EVA'S ALTERNATIVE REGRESSORS (SECTION OF II.B.3 OF THE ARTICLE) ############################################
     ''' 
+    # Uncomment if you not want to use Eva's regressors; in that case, for LUMO_ren and gap_ren calculations, set "use_ensemble_for_ols" to True.
+    
+    ### LIST OF EVA'S ALTERNATIVE REGRESSORS (SECTION OF II.B.3 OF THE ARTICLE) incl. ensembles ############################################
+
     list_regressors_lin_ols_HOMO = ["avgoccupied(eV-1)", "HOMO-(HOMO-1)", "HOMO-(HOMO-2)", "inv(HOMO-(HOMO-1))","inv(HOMO-(HOMO-2))"]
 
     list_regressors_lin_ols_LUMO_1 = ["Gap_PBE", "avgempty(eV-1)", "HOMO-(HOMO-1)", "HOMO-(HOMO-2)"]
@@ -37,22 +42,27 @@ if (not alternative_regressors):
     list_regressors_lin_ols_gap_1 = ["Gap_PBE", "avgoccupied(eV-1)", "inv((LUMO+1)-LUMO)"]
     list_regressors_lin_ols_gap_2 = ["Gap_B3LYP", "avgoccupied(eV-1)", "inv((LUMO+1)-LUMO)"]
     list_regressors_lin_ols_gapr = [list_regressors_lin_ols_gap_1, list_regressors_lin_ols_gap_2]
-    ''' 
 
     # end of LIST OF EVA'S ALTERNATIVE REGRESSORS ############################################################################
+    '''
 
+    list_regressors_lin_ols_HOMO = [ "avgoccupied(eV-1)", "Gap_PBE",
+                     "HOMO-(HOMO-1)", "HOMO-(HOMO-2)", "HOMO-(HOMO-3)", "HOMO-(HOMO-4)", "HOMO-(HOMO-5)",
+                     "inv(HOMO-(HOMO-1))", "inv(HOMO-(HOMO-2))", "inv(HOMO-(HOMO-3))","inv(HOMO-(HOMO-4))", "inv(HOMO-(HOMO-5))",
+                     "inv(LUMO-(HOMO-1))", "inv(LUMO-(HOMO-2))", "inv((LUMO+1)-HOMO)","inv((LUMO+2)-HOMO)"
+                                    ]
+    list_regressors_lin_ols_LUMO = ["Gap_PBE", "avgempty(eV-1)", "HOMO-(HOMO-1)", "inv((LUMO+2)-LUMO)", "inv((LUMO+1)-LUMO)"]
+    list_regressors_lin_ols_gapr = ["Gap_PBE", "avgoccupied(eV-1)", "avgempty(eV-1)", "inv(HOMO-(HOMO-1))", "inv((LUMO+1)-LUMO)"]
 
-    list_regressors_lin_ols_HOMO = ["Gap_PBE", "avgoccupied(eV-1)",
+    list_regressors_RF_HOMOr = ["Gap_PBE", "avgoccupied(eV-1)",
                      "HOMO-(HOMO-1)", "HOMO-(HOMO-2)", "HOMO-(HOMO-3)", "HOMO-(HOMO-4)", "HOMO-(HOMO-5)",
                      "inv(HOMO-(HOMO-1))", "inv(HOMO-(HOMO-2))", "inv(HOMO-(HOMO-3))","inv(HOMO-(HOMO-4))", "inv(HOMO-(HOMO-5))",
                      "inv(LUMO-(HOMO-1))", "inv(LUMO-(HOMO-2))", "inv((LUMO+1)-HOMO)","inv((LUMO+2)-HOMO)"]
-    list_regressors_lin_ols_LUMO = ["Gap_PBE", "avgempty(eV-1)", "HOMO-(HOMO-1)", "inv((LUMO+2)-LUMO)", "inv((LUMO+1)-LUMO)"]
-    list_regressors_lin_ols_gapr = ["Gap_PBE", "avgoccupied(eV-1)", "avgempty(eV-1)", "inv(HOMO-(HOMO-1))", "inv((LUMO+1)-LUMO)"]
-    
-    
-    list_regressors_RF_HOMOr = list_regressors_lin_ols_HOMO.copy() #["Gap_PBE","Gap_B3LYP","avgoccupied(eV-1)" ,  "inv(HOMO-(HOMO-1))", "inv(HOMO-(HOMO-2))", "inv(HOMO-(HOMO-3))","inv(HOMO-(HOMO-4))" , "HOMO-(HOMO-1)" ,  ]
-    list_regressors_RF_LUMOr = ["Gap_PBE","Gap_B3LYP","avgempty(eV-1)" ,"inv((LUMO+4)-LUMO)",  "inv((LUMO+3)-LUMO)", "inv((LUMO+2)-LUMO)","inv((LUMO+1)-LUMO)"  ,   ]
-    list_regressors_RF_gapr  = ["Gap_PBE","Gap_B3LYP","avgempty(eV-1)" ,"avgoccupied(eV-1)" ,  "inv(HOMO-(HOMO-1))", "inv(HOMO-(HOMO-2))", "inv(HOMO-(HOMO-3))","inv(HOMO-(HOMO-4))", "inv((LUMO+4)-LUMO)",  "inv((LUMO+3)-LUMO)", "inv((LUMO+2)-LUMO)","inv((LUMO+1)-LUMO)"  ,   ]
+
+    #list_regressors_RF_HOMOr = list_regressors_lin_ols_HOMO #["avgoccupied(eV-1)","Gap_PBE","HOMO-(HOMO-1)", "HOMO-(HOMO-2)", "HOMO-(HOMO-3)", "HOMO-(HOMO-4)", "HOMO-(HOMO-5)"]
+
+    list_regressors_RF_LUMOr = ["avgempty(eV-1)" ,"Gap_B3LYP","Gap_PBE","inv((LUMO+1)-LUMO)" , "inv((LUMO+2)-LUMO)",   "inv((LUMO+3)-LUMO)", "inv((LUMO+4)-LUMO)" ]
+    list_regressors_RF_gapr  = ["avgoccupied(eV-1)" ,"Gap_PBE","Gap_B3LYP","avgempty(eV-1)" ,  "inv(HOMO-(HOMO-1))", "inv(HOMO-(HOMO-2))", "inv(HOMO-(HOMO-3))","inv(HOMO-(HOMO-4))", "inv((LUMO+1)-LUMO)", "inv((LUMO+2)-LUMO)", "inv((LUMO+3)-LUMO)", "inv((LUMO+4)-LUMO)",    ]
 
     list_regressors_NN_HOMOr = ["Gap_B3LYP","Gap_PBE","avgoccupied(eV-1)","avgempty(eV-1)","deg HOMO","deg LUMO","ElecEigvalMean","ElecEigvalVariance","ElecEigvalSkewness","ElecEigvalKurtosis","HOMO-(HOMO-1)","HOMO-(HOMO-2)","HOMO-(HOMO-3)","HOMO-(HOMO-4)","HOMO-(HOMO-5)","HOMO-(HOMO-6)","(LUMO+1)-LUMO","(LUMO+2)-LUMO","(LUMO+3)-LUMO","(LUMO+4)-LUMO","(LUMO+5)-LUMO","(LUMO+6)-LUMO","inv(HOMO-(HOMO-1))","inv(HOMO-(HOMO-2))","inv(HOMO-(HOMO-3))","inv(HOMO-(HOMO-4))","inv(HOMO-(HOMO-5))","inv(HOMO-(HOMO-6))","inv((LUMO+1)-LUMO)","inv((LUMO+2)-LUMO)","inv((LUMO+3)-LUMO)","inv((LUMO+4)-LUMO)","inv((LUMO+5)-LUMO)","inv((LUMO+6)-LUMO)","inv(LUMO-(HOMO-1))","inv(LUMO-(HOMO-2))","inv((LUMO+1)-HOMO)","inv((LUMO+2)-HOMO)"]
     list_regressors_NN_LUMOr = ["Gap_PBE","avgempty(eV-1)" ,"avgoccupied(eV-1)" ,"(LUMO+1)-LUMO",  "inv((LUMO+2)-LUMO)","inv((LUMO+1)-LUMO)"  ,   ] #'ratio_bonds_hybridized',  'ratio_bonds_with_order_till_1p1_eq_nonhybridized',
@@ -61,7 +71,7 @@ if (not alternative_regressors):
     list_regressors_KNN_HOMOr = [ "avgoccupied(eV-1)", "avgempty(eV-1)" ]
     list_regressors_KNN_LUMOr = [ "avgoccupied(eV-1)", "avgempty(eV-1)" ]
     list_regressors_KNN_gapr  = [ "avgoccupied(eV-1)", "avgempty(eV-1)" ]
-    
+
 else: # alternative_regressors
 
     # list_regr_alt = ["Gap_PBE", "avgoccupied(eV-1)", "avgempty(eV-1)","(LUMO+1)-LUMO", "(LUMO+2)-LUMO", "(LUMO+3)-LUMO", "(LUMO+4)-LUMO","(LUMO+5)-LUMO","inv((LUMO+1)-LUMO)","inv((LUMO+2)-LUMO)", "inv((LUMO+3)-LUMO)", "inv((LUMO+4)-LUMO)", "inv((LUMO+5)-LUMO)","inv(LUMO-(HOMO-1))", "inv(LUMO-(HOMO-2))", "inv((LUMO+1)-HOMO)","inv((LUMO+2)-HOMO)"]

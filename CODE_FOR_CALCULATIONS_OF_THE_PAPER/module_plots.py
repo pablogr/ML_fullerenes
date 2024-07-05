@@ -511,3 +511,226 @@ def box_plot_quantiles( prefix ):
     return
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+def plot_feature_importance_old( ml_variable, feature_names, quantity, method ):
+    ''''''
+
+
+    importances = ml_variable.feature_importances_
+    std = np.std([tree.feature_importances_ for tree in ml_variable.estimators_], axis=0)
+    ml_importances = pd.Series(importances, index=feature_names)
+
+    print("Weamos\n",ml_importances)
+
+    fig, ax = plt.subplots()
+    ml_importances.plot.bar(yerr=std, ax=ax)
+    ax.set_title("Feature importances using MDI")
+    ax.set_ylabel("Mean decrease in impurity")
+    fig.tight_layout()
+    plt.show()
+
+    plot_path = module_io.execution_directory + "/Plots/" + "/feature_importance_" +  quantity + "_" +  method + ".pdf"
+    plt.savefig(plot_path, format="pdf", bbox_inches="tight")
+
+    plt.clf(); plt.cla(); plt.close('all'); del ax; del fig
+
+    return
+
+#---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+def plot_feature_importance( features_weights, quantity, method, forecast_of_residuals  ):
+    ''''''
+
+    dict_methods = { "RF":"Random Forests","NN":"Neural Networks","KNN":"k-Nearest Neighbors" }
+
+    my_subtitle = quantity+" renormalization - "+ dict_methods[method]
+    filename = 'FI_MDI_' + quantity + "_" + method
+    if (forecast_of_residuals):
+        my_subtitle += " (resid.)"
+        filename += "_resid"
+    else:
+        filename += "_woresid"
+
+    ax = plt.subplot(111)
+    plt.suptitle("Feature Importance - MDI", fontsize=17)
+    plt.title(my_subtitle, fontsize=14)
+    plt.ylabel("Mean decrease in impurity", fontsize=16)
+    plt.xticks(rotation=45,ha='right', fontsize=12)
+    plt.yticks([0.05, 0.10, 0.15, 0.20, 0.25, 0.3, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70],["", 0.10, "", 0.20, "", 0.3, "", 0.40, "", 0.50, "", 0.60, "", 0.70], fontsize=12)
+    ax.bar(features_weights.keys(), features_weights.values(), width=0.7, align='center')  # color='blue',
+    plt.ylim([0, 0.05 + 0.05 * int(max(features_weights.values())/0.05) ]);
+
+    plot_path = module_io.execution_directory + "/Plots/" + "/" + filename + ".pdf"
+    plt.savefig(plot_path, format="pdf", bbox_inches="tight")
+
+    plt.savefig("/Users/pgr/Desktop/"+filename+"-datasubset.pdf", format="pdf", bbox_inches="tight")
+
+    plt.clf(); plt.cla(); plt.close('all'); del ax
+
+
+    return
+
+#---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+def plot_feature_importance_alldata_MDI( my_configuration, field_out_to_read, regressor_fields_lr, regressor_fields_ml, param_sw, N_essais, forecast_of_residuals  ):
+    '''This function draws feature importance using Mean Decreasing in Impurity. To this end, all the
+    data are used, this is here ther is no separation between training and test data. If you want to plot
+    doing such separation, use set the corresponding flag (plot_FI_MDI_separating_train) to True in module_io.py.'''
+
+    from sklearn.inspection import permutation_importance
+
+    ''' 
+    quantity = my_configuration.quantity_to_forecast
+    method = my_configuration.ml_method
+    features_weights = {'avgoccupied(eV-1)': 0.24245583897385756, 'Gap_PBE': 0.02026678190740172, 'HOMO-(HOMO-1)': 0.08475717436917594, 'HOMO-(HOMO-2)': 0.08112798549919549, 'HOMO-(HOMO-3)': 0.06676476406478968, 'HOMO-(HOMO-4)': 0.056106953091398994, 'HOMO-(HOMO-5)': 0.036441726146585716, 'inv(HOMO-(HOMO-1))': 0.06408082370818045, 'inv(HOMO-(HOMO-2))': 0.08843977177163773, 'inv(HOMO-(HOMO-3))': 0.08693205270128751, 'inv(HOMO-(HOMO-4))': 0.06881151928556523, 'inv(HOMO-(HOMO-5))': 0.038230577808364294, 'inv(LUMO-(HOMO-1))': 0.010418599568986164, 'inv(LUMO-(HOMO-2))': 0.00987107325264252, 'inv((LUMO+1)-HOMO)': 0.02194201071224471, 'inv((LUMO+2)-HOMO)': 0.023352347138686357}
+    make_plot_feature_importances( features_weights, "Feature Importance - MDI", forecast_of_residuals,  quantity, method )
+    features_weights_from_permut = {'avgoccupied(eV-1)': 0.23002306708707498, 'Gap_PBE': 0.008897227388372411, 'HOMO-(HOMO-1)': 0.04006272564517631, 'HOMO-(HOMO-2)': 0.0367421719736308, 'HOMO-(HOMO-3)': 0.023609985151293134, 'HOMO-(HOMO-4)': 0.01900128545570482, 'HOMO-(HOMO-5)': 0.011050236757638504, 'inv(HOMO-(HOMO-1))': 0.042094701186923045, 'inv(HOMO-(HOMO-2))': 0.032612788902985586, 'inv(HOMO-(HOMO-3))': 0.03386814283240922, 'inv(HOMO-(HOMO-4))': 0.02462444304309945, 'inv(HOMO-(HOMO-5))': 0.011464583338866652, 'inv(LUMO-(HOMO-1))': 0.0048202992036918794, 'inv(LUMO-(HOMO-2))': 0.004874443718317562, 'inv((LUMO+1)-HOMO)': 0.012287723666235366, 'inv((LUMO+2)-HOMO)': 0.011918892703338008}
+    make_plot_feature_importances( features_weights_from_permut, "Feature Importance - Permutations",  forecast_of_residuals, quantity, method)
+    exit(0)
+    '''
+
+    # PART 1: Calculation of mean decreases in impurity.
+
+    quantity      = my_configuration.quantity_to_forecast
+    method        = my_configuration.ml_method
+    li_regressors = my_configuration.regressor_fields_ml
+
+    if (forecast_of_residuals):
+        from module_training import ols_multiregression
+        output_field = str(my_configuration.field_out_to_read + "_residual")  # str(quantity_to_forecast + "_residual")
+        ols_multiregression(field_out_to_read, regressor_fields_lr, regressor_fields_ml, module_io.filepath_raw_input_data, module_io.filepath_raw_input_data, module_io.filepath_raw_input_data, 0, my_configuration.different_regressors, False )
+        filepath_data = module_io.filepath_raw_input_data.replace(".csv", "-with_residuals.csv")
+    else:
+        output_field = str(my_configuration.field_out_to_read)
+        filepath_data = module_io.filepath_raw_input_data
+
+    listcols = ["Name"] + [output_field]
+    if (forecast_of_residuals): listcols.append(output_field.replace("_residual", ""))
+    listcols_train = listcols.copy().append(output_field.replace("_residual", "") + "_forecasted")
+    df_output_all     = pd.read_csv( filepath_data, header=0, usecols=listcols_train)
+    df_regressors_all = pd.read_csv( filepath_data, header=0, usecols=["Name"] + li_regressors)
+    df_output_all.set_index("Name", inplace=True)
+    df_regressors_all.set_index("Name", inplace=True)
+    m = len(df_output_all)
+    Nregressors = len(li_regressors)
+
+    X_all = np.zeros((m,Nregressors))  # We declare and initialize the independent variables (X, regressors) for the "training" (i.e. calculation of parameters of the regression).
+    y_all = np.zeros(m)                # We declare and initialize the dependent variable (y) for the training.
+
+    for i in range(m):
+            y_all[i] = float( df_output_all.iloc[i][output_field] )
+            for j in range(len(li_regressors)):  # We avoid the 1st, 2nd and last fields because they are 'Name' (molecule label) and the output_variable (e.g. 'HOMO ren (output)_residual')
+                X_all[i,j] = float( df_regressors_all.iloc[i][str(li_regressors[j])] )
+
+    # Actual ML training:
+
+    if ((method == "NN") or (method == "Neural networks")):
+       from sklearn.neural_network import MLPRegressor
+    elif ((method=="RF") or (method=="Random forest") or (method=="Random forests")):
+       from sklearn.ensemble import RandomForestRegressor
+    elif ((method == "KRR") or (method=="Kernel ridge regression") or (method=="Kernel ridge") ):
+       from sklearn.kernel_ridge import KernelRidge
+    elif ((method=="SVM") or (method == "Support vector machine")):
+       from sklearn import svm
+    elif ((method=="KNN") or (method == "K-nearest neighbours")):
+       from sklearn import neighbors #KNeighborsRegressor
+    elif (method=="GB"):
+        from sklearn.ensemble import GradientBoostingRegressor
+    else:
+       print("\n   ERROR: Unrecognized ML method ",method,"; please enter 'Lasso', 'RF', 'NN', 'KNN,  'KRR' or 'SVM'.\n")
+       exit(1)
+
+    if ((method == "NN") or (method == "Neural networks")):
+       ml_variable = MLPRegressor(hidden_layer_sizes=(int(param_sw), int(param_sw / 2),), activation='logistic', solver='adam',max_iter=10000, alpha=0.01, learning_rate_init=0.0015, momentum=0.6)
+    elif ((method == "KNN") or (method == "K-nearest neighbours")):
+       ml_variable =  neighbors.KNeighborsRegressor(n_neighbors=param_sw,weights="uniform", p=1 ) # "uniform" or "distance"; (40,"uniform") slightly beats ols; leaf_size=1 #algorithm{‘auto’, ‘ball_tree’, ‘kd_tree’, ‘brute’
+    elif ((method=="RF") or (method=="Random forest") or (method=="Random forests")):
+       ml_variable = RandomForestRegressor( n_estimators=param_sw, min_samples_leaf=2, max_features=3 )#, max_features=2 , max_depth=1, min_samples_leaf=2, min_samples_split=4)
+    elif (method == "GB"):
+        ml_variable = GradientBoostingRegressor(learning_rate=0.05, n_estimators=70, subsample=1.0, criterion='friedman_mse', min_samples_split=2, min_samples_leaf=1, min_weight_fraction_leaf=0.0, max_depth=3, max_features=None, alpha=0.9 )
+    elif ((method == "KRR") or (method=="Kernel ridge regression") or (method=="Kernel ridge") ):
+        ml_variable = KernelRidge(alpha=param_sw, kernel='laplacian')  # kernel= "linear", "rbf", "laplacian", "polynomial", "exponential", "chi2", "sigmoid"
+    elif ((method=="SVM") or (method == "Support vector machine")):
+        ml_variable = svm.SVR(kernel='rbf',epsilon=0.06 ) #'poly' (e.g. with degree=2), 'rbf', 'linear', 'precomputed', 'sigmoid'
+        # IMPORTANT: The regressors MUST be standardized!!
+    else:
+        print("\nERROR: Unknown ML method",method,"\n"); exit(1)
+
+    features_weights             = dict(zip(my_configuration.regressor_fields_ml, [0.0] * (len(my_configuration.regressor_fields_ml))))
+    features_weights_from_permut =  features_weights.copy()
+
+    for i in range(N_essais):
+
+        ml_variable.fit(X_all, y_all)
+        importances = ml_variable.feature_importances_
+        ml_importances = pd.Series(importances, index=li_regressors)
+        importances_from_permut    = permutation_importance( ml_variable, X_all, y_all, n_repeats=10 )
+        ml_importances_from_permut = pd.Series( importances_from_permut.importances_mean , index=li_regressors )
+        for regressor_name in li_regressors:
+            features_weights[regressor_name]             += ml_importances[regressor_name]
+            features_weights_from_permut[regressor_name] += ml_importances_from_permut[regressor_name]
+
+    for regressor_name in my_configuration.regressor_fields_ml:
+        features_weights[regressor_name]             /= N_essais
+        features_weights_from_permut[regressor_name] /= N_essais
+
+    print("Features weights:\n",features_weights)
+    print("Features weights from permutation:\n", features_weights_from_permut, "\n")
+
+
+    # PART 2: Actual plotting
+
+    make_plot_feature_importances( features_weights, "Feature Importance - MDI", forecast_of_residuals,  quantity, method )
+    make_plot_feature_importances( features_weights_from_permut, "Feature Importance - Permutations",  forecast_of_residuals, quantity, method)
+
+    return
+
+#---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+def make_plot_feature_importances( features_weights, my_suptitle, forecast_of_residuals, quantity, method ):
+
+    #dict_methods = {"RF": "Random Forests", "NN": "Neural Networks", "KNN": "k-Nearest Neighbors"}
+
+    my_subtitle = quantity + " renormalization"
+    if ("MDI" in my_suptitle):
+        filename = 'FI_MDI_' + quantity + "_" + method
+        my_title = "Mean decrease in impurity"
+    else:
+        filename = 'FI_permut_'+ quantity + "_" + method
+        my_title = "Mean accuracy decrease"
+
+    if (forecast_of_residuals):
+        my_subtitle += " (resid.)"
+        filename += "_resid"
+    else:
+        filename += "_woresid"
+
+    fig, ax = plt.subplots(figsize=(max(6.4,0.1*6.4*(len(features_weights.keys()))),4.8))
+    plt.suptitle(my_suptitle, fontsize=17)
+    plt.title(my_subtitle, fontsize=14)
+    plt.ylabel(my_title, fontsize=16)
+    plt.xticks(rotation=45,ha='right', fontsize=12)
+    ax.bar(features_weights.keys(), features_weights.values(), width=0.7, align='center')  # color='blue',
+    my_ylim =  0.05 * int(max(features_weights.values())/0.05) + 0.05
+    if ((my_ylim-max(features_weights.values() ) ) < 0.02):
+        my_ylim += 0.05
+    if (my_ylim < 0.40001):
+        plt.yticks([0.05, 0.10, 0.15, 0.20, 0.25, 0.3, 0.35, 0.40], [0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40],fontsize=12)
+    else:
+        plt.yticks([0.05, 0.10, 0.15, 0.20, 0.25, 0.3, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.8, 0.85, 0.9, 0.95, 1.0],["", 0.1, "", 0.2, "", 0.3, "", 0.4, "", 0.5, "", 0.6, "", 0.7,"", 0.8, "", 0.9, "", 1.0], fontsize=12)
+    plt.ylim([0, my_ylim]);
+    #f = plt.figure()
+    #f.set_figwidth()
+    #f.set_figheight(4.8)
+    #print("La length es ",len(features_weights.keys()))
+
+    plot_path = module_io.execution_directory + "/Plots/" + "/" + filename + ".pdf"
+    plt.savefig(plot_path, format="pdf", bbox_inches="tight")
+
+    plt.savefig("/Users/pgr/Desktop/"+filename+".pdf", format="pdf", bbox_inches="tight")#xxx
+
+    plt.clf(); plt.cla(); plt.close('all'); del ax
+
+    return
+
+#---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

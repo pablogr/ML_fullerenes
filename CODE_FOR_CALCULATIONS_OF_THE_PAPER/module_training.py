@@ -273,13 +273,12 @@ def ols_multiregression( field_out_to_read, regressor_fields, regressor_fields_t
 
 #-------------------------------------------------------------------------------------------------------------------------------------
 
-def ml_regression( config, param_sw, filepath_training_data, filepath_validation_data ):
+def ml_regression( config, param_sw, filepath_training_data, filepath_validation_data, features_weights=None ):
     '''
     :param method: (string) The keyword of the ML method to be used.
     :param quantity_to_forecast: (string) either HOMO_ren, LUMO_ren or gap_ren
     :param filepath_training_data: (string) path to the .csv file which contains the training data
     :param filepath_validation_data:     (string) path to the .csv file which contains the validation data (i.e. either "test" or "backtesting" data)
-    :param li_regressors: (list of strings) list of the names of the regressors, which appear at both the filepath_training and filepath_validation
     :return:
     '''
     '''This function performs the regression of a set of data ("training") and predicts the T1_RETURN
@@ -288,7 +287,7 @@ def ml_regression( config, param_sw, filepath_training_data, filepath_validation
     method=config.ml_method
     quantity_to_forecast=config.quantity_to_forecast
     forecast_of_residuals = config.forecast_of_residuals
-    li_regressors = config.regressor_fields_ml
+    li_regressors = config.regressor_fields_ml #(list of strings) list of the names of the regressors, which appear at both the filepath_training and filepath_validation
     verbose = module_io.verbosity
 
     df_err_train_1 = module_io.errors_df.copy()
@@ -328,7 +327,7 @@ def ml_regression( config, param_sw, filepath_training_data, filepath_validation
     if (forecast_of_residuals): listcols.append(output_field.replace("_residual", ""))
     listcols_train = listcols.copy().append(output_field.replace("_residual", "")+"_forecasted")
 
-    df_output_tr = pd.read_csv( filepath_training_data, header=0, usecols = listcols_train )
+    df_output_tr     = pd.read_csv( filepath_training_data, header=0, usecols = listcols_train )
     df_regressors_tr = pd.read_csv( filepath_training_data, header=0, usecols =  ["Name"] + li_regressors  )
 
     df_output_tr.set_index("Name", inplace=True)
@@ -343,9 +342,6 @@ def ml_regression( config, param_sw, filepath_training_data, filepath_validation
             y_train[i] = float( df_output_tr.iloc[i][output_field] )
             for j in range(len(li_regressors)):  # We avoid the 1st, 2nd and last fields because they are 'Name' (molecule label) and the output_variable (e.g. 'HOMO ren (output)_residual')
                 X_train[i,j] = float( df_regressors_tr.iloc[i][str(li_regressors[j])] )
-
-
-
 
     #df_err_train_1["Y_full_ref"] = df_output_tr[output_field]
 
@@ -403,6 +399,14 @@ def ml_regression( config, param_sw, filepath_training_data, filepath_validation
 
 
     ml_variable.fit(X_train, y_train)
+
+    if (module_io.plot_FI_MDI_separating_train):
+        importances = ml_variable.feature_importances_
+        ml_importances = pd.Series(importances, index=li_regressors)
+        for regressor_name in li_regressors:
+            features_weights[regressor_name] += ml_importances[regressor_name]
+    else:
+        features_weights = None
 
     df_err_train_1["Y_full_ref"] = df_output_tr[output_field.replace("_residual", "")] # Value of the ab initio renormalization (for the training dataset)
     if (forecast_of_residuals):
@@ -483,7 +487,7 @@ def ml_regression( config, param_sw, filepath_training_data, filepath_validation
     if ( (not module_io.store_ml_errors) or (not config.forecast_of_residuals) ):
         df_err_train_1 = None; df_err_test_1 = None
 
-    return   avg_err_meV, 100*avg_err_perc, avg_abs_error_val_ols, df_err_train_1, df_err_test_1
+    return   avg_err_meV, 100*avg_err_perc, avg_abs_error_val_ols, df_err_train_1, df_err_test_1, features_weights
 
 # -----------------------------------------------------------------------------------------------------------
 

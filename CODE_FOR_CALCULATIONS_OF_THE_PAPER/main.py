@@ -22,6 +22,7 @@ import module_io
 from module_initialization import initialization, initialize_error_files, middle_message, final_message
 from module_training import select_training_test_and_BT_datasets, linear_regression, ml_regression, update_df_errors
 import gc
+from module_plots import plot_feature_importance, plot_feature_importance_alldata_MDI
 
 
 '''
@@ -39,9 +40,9 @@ exit(0)
 '''
 
 
-for quantity in ["LUMO","gap"]: # ["HOMO","LUMO","gap"]
-    for forecast_of_residuals in [True,False]:  # [True,False]
-        for method in ["RF","NN", "KNN"]: # ["RF","NN", "KNN","GB"]
+for quantity in ["gap"]: #["HOMO","LUMO","gap"]
+    for forecast_of_residuals in [True]:  #[True,False]
+        for method in ["RF"]: #["RF","NN", "KNN","GB"]
 
             my_configuration = module_io.Configuration(quantity,method,forecast_of_residuals)
 
@@ -52,9 +53,13 @@ for quantity in ["LUMO","gap"]: # ["HOMO","LUMO","gap"]
             # Sweep in different random selections of rows of the dataset
             for param_sw in my_configuration.param_sweep:
 
+               if (method=="RF"): plot_feature_importance_alldata_MDI(my_configuration, field_out_to_read, regressor_fields_lr, regressor_fields_ml, param_sw, N_essais, forecast_of_residuals)
+               exit(0)# xxx
+
                sum_error_meV = 0.0; sum_error_perc = 0.0; sum_avg_abs_error_val_ols=0.0
                df_errors_train =  module_io.errors_df0.copy()
                df_errors_test  =  module_io.errors_df0.copy()
+               features_weights = dict(zip(my_configuration.regressor_fields_ml,[0.0]*(len(my_configuration.regressor_fields_ml) )))
 
                for i in range(1,N_essais+1):
 
@@ -73,7 +78,7 @@ for quantity in ["LUMO","gap"]: # ["HOMO","LUMO","gap"]
                          filepath_training_data_ml = filepath_training_data
                          filepath_test_data_ml     = filepath_test_data
 
-                      error_meV, error_perc, avg_abs_error_val_ols, df_err_train_1, df_err_test_1 = ml_regression( my_configuration, param_sw, filepath_training_data_ml, filepath_test_data_ml ) #( ml_method, field_out_to_read, regressor_fields_ml, filepath_training_data_ml, filepath_test_data_ml, param_sw, forecast_of_residuals, verbosity )
+                      error_meV, error_perc, avg_abs_error_val_ols, df_err_train_1, df_err_test_1, features_weights = ml_regression( my_configuration, param_sw, filepath_training_data_ml, filepath_test_data_ml, features_weights ) #( ml_method, field_out_to_read, regressor_fields_ml, filepath_training_data_ml, filepath_test_data_ml, param_sw, forecast_of_residuals, verbosity )
 
                       if (i==1): fp_train, fp_test = initialize_error_files(my_configuration, method, quantity, forecast_of_residuals, param_sw, all_cols)
                       df_errors_train = update_df_errors( i, df_errors_train, df_err_train_1, fp_train, my_configuration.forecast_of_residuals, all_cols, 'train' )
@@ -83,6 +88,11 @@ for quantity in ["LUMO","gap"]: # ["HOMO","LUMO","gap"]
                       sum_error_meV += error_meV; sum_error_perc += error_perc;
                       if (my_configuration.forecast_of_residuals): sum_avg_abs_error_val_ols += avg_abs_error_val_ols
                       if ( (verbosity != 0) and ((i%200)==0)): print( i, " M.e.%:",sum_error_perc/i, "(",sum_error_meV/i,"meV)")
+
+               if ((method=="RF") and (module_io.plot_FI_MDI_separating_train)):
+                  for regressor_name in my_configuration.regressor_fields_ml:
+                      features_weights[regressor_name]  /= N_essais
+                  plot_feature_importance(features_weights, my_configuration.quantity_to_forecast, my_configuration.ml_method, forecast_of_residuals)
 
                sum_error_meV /= N_essais; sum_error_perc /= N_essais;
                if (my_configuration.forecast_of_residuals):  sum_avg_abs_error_val_ols/= N_essais # Average of the errors
